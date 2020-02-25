@@ -1,7 +1,14 @@
+import 'package:expenses_app/widgets/transaction_list.dart';
 import 'package:flutter/material.dart';
-import 'transaction.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() => runApp(MyApp());
+import './widgets/new_transaction.dart';
+import './models/transaction.dart';
+
+void main() {
+  initializeDateFormatting('pt_BR', null);
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -13,58 +20,83 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  final List<Transaction> transactions = [
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final List<Transaction> _userTransactions = [
     Transaction(
       id: "t1",
-      title: "New shoes",
+      title: "Novos tênis",
       amount: 69.99,
       date: DateTime.now(),
     ),
     Transaction(
       id: "t2",
-      title: "Weekly groceries",
+      title: "Compras semanais",
       amount: 16.53,
       date: DateTime.now(),
     ),
   ];
 
+  void _addNewTransaction(String title, double amount) {
+    final Transaction trs = Transaction(
+      title: title,
+      amount: amount,
+      date: DateTime.now(),
+      id: DateTime.now().toString(),
+    );
+
+    setState(() {
+      _userTransactions.add(trs);
+    });
+  }
+
+  void startAddNewTransaction(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (_) {
+          return NewTransaction(_addNewTransaction);
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Flutter App"),
-      ),
-      body: Column(
-        children: <Widget>[
-          Container(
-            width: double.infinity,
-            child: Card(
-              color: Colors.blue,
-              child: Text("Chart"),
-              elevation: 5,
+        backgroundColor: Colors.purple,
+        title: Text("Despesas"),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(
+              Icons.add,
             ),
-          ),
-          Column(
-            children: transactions.map((t) {
-              return Card(
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                      child: Text(t.amount.toString()),
-                    ),
-                    Column(
-                      children: <Widget>[
-                        Text(t.title),
-                        Text(t.date.toString()),
-                      ],
-                    )
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
+            onPressed: () => startAddNewTransaction(context),
+          )
         ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            Container(
+              width: double.infinity,
+              child: Card(
+                color: Colors.purple,
+                child: Text("Quadro de  Gráficos"),
+                elevation: 5,
+              ),
+            ),
+            TransactionList(_userTransactions),
+          ],
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.purple,
+        child: Icon(Icons.add),
+        onPressed: () => startAddNewTransaction(context),
       ),
     );
   }
